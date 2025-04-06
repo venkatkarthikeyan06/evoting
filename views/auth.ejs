@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tf.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #e3f2fd, #bbdefb);
+            font-family: 'Arial', sans-serif;
+        }
+        .container-box {
+            max-width: 600px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            margin-top: 50px;
+        }
+        video {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .status {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 10px;
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        nav a {
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 12px 18px;
+            transition: color 0.3s, transform 0.3s;
+            text-decoration: none;
+        }
+        nav a:hover {
+            transform: scale(1.15);
+            color: #c8e6c9;
+        }
+        nav {
+            background: linear-gradient(to right, #00796b, #004d40);
+            padding: 12px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-gradient-to-r from-teal-700 to-green-500 text-white py-8 text-center text-5xl font-bold shadow-lg">
+        Secure E-Voting System
+    </header>
+<!-- Navbar -->
+<nav class="sticky top-0 z-50">
+    <div class="container mx-auto flex justify-center space-x-8 text-xl">
+        <a href="/about">About</a>
+        <a href="/votedetails">User  Details</a>
+        <a href="/auth">Authentication Process</a>
+        <a href="/decrypto">Voter Registration</a>
+        <a href="/vote">Vote Casting</a>
+        <a href="/">Logout</a>
+    </div>
+</nav>
+
+<div class="container  flex flex-column align-items-center justify-center min-vh-100">
+    <div class="container-box">
+        <h2 class="text-2xl font-bold">Face Authentication</h2>
+        <video id="video" autoplay></video>
+        <p id="status" class="status">Detecting face...</p>
+
+        <form action="/send-otp" method="POST">
+            <label for="email">Enter your email:</label>
+            <input type="email" name="email" id="email" required>
+            <button type="submit">Get OTP</button>
+        </form>
+
+        <form action="/verify-otp" method="POST">
+            <label class="text-2xl font-bold mt-6" for="otp">Enter OTP:</label>
+            
+            <input type="text" name = "otp" id="otp" class="border-2 border-gray-400 p-2 rounded-lg w-3/4" placeholder="Enter OTP">
+            <button onclick="verifyOTP()" class="bg-teal-700 text-white px-6 py-2 mt-3 rounded-lg hover:bg-teal-900 transition-all">
+                Verify OTP
+            </button>
+            <p id="otp-status" class="mt-2 text-red-500"></p>
+        </form>
+
+        <% if (message) { %>
+            <p class="message"> <%= message %></p>
+        <% } %>
+        
+        <!-- <h2 class="text-2xl font-bold mt-6">Enter OTP</h2> -->
+    </div>
+</div>
+
+<!-- Footer -->
+<div class="bg-gradient-to-r from-teal-700 to-green-500 text-white text-center py-4 mt-auto">
+    &copy; 2025 Secure E-Voting System | Ensuring Safe and Transparent Elections
+</div>
+
+<script>
+    async function setupCamera() {
+        const video = document.getElementById("video");
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        return new Promise(resolve => video.onloadedmetadata = resolve);
+    }
+
+    async function detectFace() {
+        await setupCamera();
+        const video = document.getElementById("video");
+        const status = document.getElementById("status");
+        const model = await blazeface.load();
+
+        setInterval(async () => {
+            const predictions = await model.estimateFaces(video, false);
+            if (predictions.length > 0) {
+                status.innerText = "Face Detected ✅";
+                status.classList.add("success");
+            } else {
+                status.innerText = "No Face Detected ❌";
+                status.classList.remove("success");
+            }
+        }, 1000);
+    }
+
+    detectFace();
+
+    async function verifyOTP() {
+        const otp = document.getElementById("otp").value;
+        const response = await fetch("/verify-otp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ otp })
+        });
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById("otp-status").innerText = "OTP Verified ✅";
+            document.getElementById("otp-status").classList.add("text-green-600");
+        } else {
+            document.getElementById("otp-status").innerText = "Invalid OTP ❌";
+        }
+    }
+</script>
+
+</body>
+</html>

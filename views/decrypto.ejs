@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #e3f2fd, #bbdefb);
+            font-family: 'Arial', sans-serif;
+        }
+        .container-box {
+            max-width: 500px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .submit-btn {
+            background: #00796b;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 100%;
+        }
+        nav a {
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 12px 18px;
+            transition: color 0.3s, transform 0.3s;
+            text-decoration: none;
+        }
+        nav a:hover {
+            transform: scale(1.15);
+            color: #c8e6c9;
+        }
+        nav {
+            background: linear-gradient(to right, #00796b, #004d40);
+            padding: 12px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-gradient-to-r from-teal-700 to-green-500 text-white py-6 text-center text-4xl font-bold shadow-md">
+        Secure E-Voting System
+    </header>
+<!-- Navbar -->
+<nav class="sticky top-0 z-50">
+    <div class="container mx-auto flex justify-center space-x-8 text-xl">
+        <a href="/about">About</a>
+        <a href="/votedetails">User  Details</a>
+        <a href="/auth">Authentication Process</a>
+        <a href="/decryptol">Voter Registration</a>
+        <a href="/vote">Vote Casting</a>
+        <a href="/">Logout</a>
+    </div>
+</nav>
+
+<!-- User Details Form -->
+
+
+        <div class="flex justify-center items-center min-h-screen px-4 md:px-8 lg:px-16">
+            <div class="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 md:p-8 lg:p-10">
+                <h2 class="text-2xl font-bold text-center mb-4">Enter Your Details</h2>
+        <form id="voterForm" action="/vote" method="post">
+            <input type="text" id="name" placeholder="Name" required class="w-full p-2 mb-3 border rounded"><br>
+            <input type="number" id="age" placeholder="Age" required class="w-full p-2 mb-3 border rounded"><br>
+            <input type="email" id="email" placeholder="Email" required class="w-full p-2 mb-3 border rounded"><br>
+            <input type="text" id="voterId" placeholder="Voter ID" required class="w-full p-2 mb-3 border rounded"><br>
+            <button type="submit" class="submit-btn" onclick="page('vote')">Proceed to Vote</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function page(name){
+        window.location.href=name;
+    }
+    document.getElementById("voterForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        let name = document.getElementById("name").value;
+        let age = document.getElementById("age").value;
+        let email = document.getElementById("email").value;
+        let voterId = document.getElementById("voterId").value;
+
+        if (age < 18) {
+            alert("You must be at least 18 years old to vote.");
+            return;
+        }
+
+        localStorage.setItem("name", name);
+        localStorage.setItem("age", age);
+        localStorage.setItem("email", email);
+        localStorage.setItem("voterId", voterId);
+
+    });
+</script>
+
+</body>
+</html>

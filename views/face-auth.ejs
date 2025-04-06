@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Authentication</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Face Authentication</h1>
+    </header>
+    
+    <main>
+        <div class="card">
+            <h2>Face Verification</h2>
+            <p>Please position your face in the camera view for authentication.</p>
+            
+            <div class="video-container">
+                <video id="video" width="640" height="480" autoplay muted></video>
+                <canvas id="overlay"></canvas>
+            </div>
+            
+            <div class="auth-status" id="auth-status"></div>
+            
+            <div class="auth-buttons">
+                <button id="start-auth" class="btn btn-primary">Start Authentication</button>
+                <button id="proceed-to-vote" class="btn btn-success" style="display: none;">Proceed to Vote</button>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; 2024 E-Voting System. All rights reserved.</p>
+    </footer>
+    
+    <!-- Load face-api.js models -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    
+    <script>
+        // DOM elements
+        const video = document.getElementById('video');
+        const overlay = document.getElementById('overlay');
+        const overlayCtx = overlay.getContext('2d');
+        const startAuthBtn = document.getElementById('start-auth');
+        const proceedToVoteBtn = document.getElementById('proceed-to-vote');
+        const authStatus = document.getElementById('auth-status');
+        
+        // Load face-api models
+        Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+            faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+            faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+        ]).then(startVideo);
+        
+        // Start video stream
+        function startVideo() {
+            navigator.mediaDevices.getUserMedia({ video: {} })
+                .then(stream => {
+                    video.srcObject = stream;
+                })
+                .catch(err => {
+                    console.error('Error accessing camera:', err);
+                    authStatus.textContent = 'Error accessing camera. Please check permissions.';
+                    authStatus.className = 'auth-status auth-failure';
+                });
+        }
+        
+        // Start authentication process
+        startAuthBtn.addEventListener('click', async () => {
+            authStatus.textContent = 'Authenticating...';
+            authStatus.className = 'auth-status';
+            
+            // Detect face
+            const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks();
+            
+            if (detections.length === 0) {
+                authStatus.textContent = 'No face detected. Please position your face in the camera view.';
+                authStatus.className = 'auth-status auth-failure';
+                return;
+            }
+            
+            if (detections.length > 1) {
+                authStatus.textContent = 'Multiple faces detected. Please ensure only your face is in the camera view.';
+                authStatus.className = 'auth-status auth-failure';
+                return;
+            }
+            
+            // In a real application, you would compare this face with a stored face descriptor
+            // For this demo, we'll simulate a successful authentication
+            
+            // Simulate authentication delay
+            setTimeout(() => {
+                authStatus.textContent = 'Authentication successful!';
+                authStatus.className = 'auth-status auth-success';
+                proceedToVoteBtn.style.display = 'inline-block';
+                
+                // Store authentication status in session
+                sessionStorage.setItem('faceAuthenticated', 'true');
+            }, 1500);
+        });
+        
+        // Proceed to voting page
+        proceedToVoteBtn.addEventListener('click', () => {
+            window.location.href = '/vote';
+        });
+        
+        // Draw face detection boxes
+        video.addEventListener('play', () => {
+            const displaySize = { width: video.width, height: video.height };
+            faceapi.matchDimensions(overlay, displaySize);
+            
+            setInterval(async () => {
+                const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                    .withFaceLandmarks();
+                
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
+                faceapi.draw.drawDetections(overlay, resizedDetections);
+                faceapi.draw.drawFaceLandmarks(overlay, resizedDetections);
+            }, 100);
+        });
+    </script>
+</body>
+</html> 

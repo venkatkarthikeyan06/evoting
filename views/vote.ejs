@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote for Your Party</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Secure E-Voting System</h1>
+    </header>
+
+    <nav>
+        <div class="container">
+            <a href="about">About</a>
+            <a href="votedetails">User Details</a>
+            <a href="auth">Authentication Process</a>
+            <a href="decrypto">Voter Registration</a>
+            <a href="vote">Vote Casting</a>
+            <a href="/">Logout</a>
+        </div>
+    </nav>
+
+    <main>
+        <div class="text-center">
+            <h2>Choose Your Party</h2>
+            <div class="party-grid">
+                <!-- Party Cards -->
+                <div class="party-card" onclick="selectParty('BJP')">
+                    <img src="pictures/bjp.webp" alt="BJP">
+                    <h3>BJP</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('CONGRESS')">
+                    <img src="pictures/inc.png" alt="CONGRESS">
+                    <h3>CONGRESS</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('TRS')">
+                    <img src="./pictures/brs.jpeg" alt="TRS">
+                    <h3>TRS</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('TDP')">
+                    <img src="./pictures/tdp.jpg" alt="TDP">
+                    <h3>TDP</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('JSP')">
+                    <img src="./pictures/jsp.jpg" alt="JSP">
+                    <h3>JSP</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('AAP')">
+                    <img src="./pictures/aap.webp" alt="AAP">
+                    <h3>AAP</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('YSRCP')">
+                    <img src="./pictures/ysrcp.png" alt="YSRCP">
+                    <h3>YSRCP</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('TVK')">
+                    <img src="./pictures/tvk.webp" alt="TVK">
+                    <h3>TVK</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('SHIVSENA')">
+                    <img src="./pictures/shiv.png" alt="SHIVSENA">
+                    <h3>Shiv sena</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('JDS')">
+                    <img src="./pictures/jds.jpeg" alt="JDS">
+                    <h3>JDS</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('CPI')">
+                    <img src="./pictures/cpi.jpg" alt="CPI">
+                    <h3>CPI</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('DMK')">
+                    <img src="./pictures/dmk.png" alt="DMK">
+                    <h3>DMK</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+                <div class="party-card" onclick="selectParty('NOTA')">
+                    <img src="./pictures/noto.png" alt="NOTA">
+                    <h3>NOTA</h3>
+                    <button class="vote-btn">Vote</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="qr-section" id="qrSection">
+            <h3>Your Vote Confirmation QR Code</h3>
+            <p>This QR code contains your vote information. Please save it for your records.</p>
+            <div id="qrcode"></div>
+            <div class="vote-confirmation" id="voteConfirmation"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 E-Voting System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Check if face authentication was completed
+        if (!sessionStorage.getItem("faceAuthenticated")) {
+            alert("Please complete face authentication first!");
+            window.location.href = "/face-auth";
+        }
+
+        function selectParty(party) {
+            if (localStorage.getItem("hasVoted")) {
+                alert("You have already voted! You cannot vote again.");
+                return;
+            }
+
+            localStorage.setItem("selectedParty", party);
+            localStorage.setItem("hasVoted", "true"); // Prevent multiple votes
+            console.log("Voted for:", party);
+
+            // Disable all vote buttons
+            let buttons = document.querySelectorAll(".vote-btn");
+            buttons.forEach(btn => {
+                btn.classList.add("disabled");
+                btn.innerText = "Voted";
+                btn.onclick = null;
+            });
+
+            // Generate QR Code and submit vote
+            generateQRCodeAndSubmitVote(party);
+        }
+
+        function generateQRCodeAndSubmitVote(party) {
+            // Get voter information from localStorage
+            const voterId = localStorage.getItem("voterId") || "VOTER-" + Math.random().toString(36).substr(2, 9);
+            const name = localStorage.getItem("name") || "Anonymous Voter";
+            const email = localStorage.getItem("email") || "anonymous@example.com";
+            
+            // Create voter data object
+            const voterData = {
+                voterId,
+                name,
+                email,
+                party,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Convert to JSON string for QR code
+            const qrText = JSON.stringify(voterData);
+            
+            // Show QR section
+            document.getElementById("qrSection").style.display = "block";
+            
+            // Clear previous QR code
+            document.getElementById("qrcode").innerHTML = "";
+            
+            // Generate QR Code
+            new QRCode(document.getElementById("qrcode"), {
+                text: qrText,
+                width: 200,
+                height: 200
+            });
+            
+            // Submit vote to server
+            fetch("/submit-vote", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    voterId,
+                    name,
+                    email,
+                    party,
+                    timestamp: new Date().toISOString()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("voteConfirmation").style.display = "block";
+                    document.getElementById("voteConfirmation").innerHTML = "Your vote has been successfully recorded!";
+                } else {
+                    alert("Error submitting vote: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Error submitting vote. Please try again.");
+            });
+        }
+    </script>
+</body>
+</html>

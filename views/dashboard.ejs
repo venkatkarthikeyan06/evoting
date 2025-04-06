@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Voting Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="flex justify-between items-center">
+                <h1>E-Voting Dashboard</h1>
+                <div class="flex items-center space-x-4">
+                    <span>Welcome, <%= user.name %></span>
+                    <a href="/logout" class="btn btn-danger">Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- User Information -->
+        <div class="dashboard-card">
+            <h2>Your Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p><strong>Name:</strong> <%= user.name %></p>
+                    <p><strong>Email:</strong> <%= user.email %></p>
+                    <p><strong>Voter ID:</strong> <%= user.voterId %></p>
+                    <p><strong>Aadhar Number:</strong> <%= user.aadharNumber.replace(/\d{8}/, '********') %></p>
+                </div>
+                <div>
+                    <p><strong>Phone Number:</strong> <%= user.phoneNumber %></p>
+                    <p><strong>Address:</strong> <%= user.address %></p>
+                    <p><strong>Registration Date:</strong> <%= user.registrationDate.toLocaleDateString() %></p>
+                    <p><strong>Voting Status:</strong> 
+                        <span class="<%= user.hasVoted ? 'text-success' : 'text-danger' %>">
+                            <%= user.hasVoted ? 'Voted' : 'Not Voted' %>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voting Statistics -->
+        <div class="dashboard-card">
+            <h2>Voting Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Registered Voters</h3>
+                    <div class="stat-number"><%= stats.totalVoters %></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Votes Cast</h3>
+                    <div class="stat-number"><%= stats.totalVotes %></div>
+                </div>
+                <div class="stat-card">
+                    <h3>Voter Turnout</h3>
+                    <div class="stat-number"><%= stats.turnoutPercentage %>%</div>
+                </div>
+            </div>
+        </div>
+
+        <% if (!user.hasVoted) { %>
+        <!-- Voting Actions -->
+        <div class="dashboard-card">
+            <h2>Voting Actions</h2>
+            <div class="flex space-x-4">
+                <a href="/auth" class="btn btn-primary">
+                    Start Voting Process
+                </a>
+                <a href="/about" class="btn btn-secondary">
+                    Learn More About Voting
+                </a>
+            </div>
+        </div>
+        <% } else { %>
+        <!-- Vote Confirmation -->
+        <div class="dashboard-card">
+            <h2>Vote Confirmation</h2>
+            <p class="text-success">Your vote has been successfully recorded. Thank you for participating!</p>
+            <% if (user.qrCode) { %>
+            <div class="mt-4">
+                <h3>Your Vote QR Code</h3>
+                <div id="qrcode"></div>
+            </div>
+            <% } %>
+        </div>
+        <% } %>
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+            <h2>Recent Activity</h2>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% activities.forEach(activity => { %>
+                        <tr>
+                            <td><%= activity.description %></td>
+                            <td><%= activity.date.toLocaleString() %></td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 E-Voting System. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <% if (user.hasVoted && user.qrCode) { %>
+    <script>
+        new QRCode(document.getElementById("qrcode"), {
+            text: '<%= user.qrCode %>',
+            width: 128,
+            height: 128
+        });
+    </script>
+    <% } %>
+</body>
+</html> 

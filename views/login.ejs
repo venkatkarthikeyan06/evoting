@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - E-Voting System</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>E-Voting System</h1>
+    </header>
+
+    <main>
+        <div class="auth-card">
+            <h2>Login</h2>
+            
+            <% if (message) { %>
+            <div class="alert alert-danger">
+                <%= message %>
+            </div>
+            <% } %>
+
+            <form action="/login" method="POST">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <div class="form-group">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="remember" name="remember" class="mr-2">
+                            <label for="remember">Remember me</label>
+                        </div>
+                        <a href="/forgot-password" class="text-secondary">Forgot Password?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+
+            <div class="mt-4 text-center">
+                <p>Don't have an account? 
+                    <a href="/signup" class="text-secondary">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 E-Voting System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Client-side validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            let isValid = true;
+            let errorMessage = '';
+
+            if (!email) {
+                errorMessage = 'Email is required';
+                isValid = false;
+            } else if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                errorMessage = 'Please enter a valid email address';
+                isValid = false;
+            }
+
+            if (!password) {
+                errorMessage = 'Password is required';
+                isValid = false;
+            } else if (password.length < 6) {
+                errorMessage = 'Password must be at least 6 characters long';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger';
+                errorDiv.textContent = errorMessage;
+                
+                // Remove any existing error messages
+                const existingError = document.querySelector('.alert');
+                if (existingError) existingError.remove();
+                
+                // Add new error message
+                document.querySelector('form').insertBefore(errorDiv, document.querySelector('button'));
+            }
+        });
+    </script>
+</body>
+</html> 
